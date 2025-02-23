@@ -27,23 +27,26 @@ Bot Telegram untuk mengelola dan memantau perangkat GenieACS dengan mudah. Bot i
 
 
 ## 🚀 Instalasi
-
+```
 apt install git curl -y
+```
 
 1. Clone repository ini
-
+```
 git clone https://github.com/alijayanet/telebot-acs
-
+```
 3. Masuk ke direktori project
-   
+   ```
    cd telebot-acs
+   ```
 4. Install dependensi
-   
+   ```
    npm install
+   ```
 6. Jalankan bot
-   
+   ```
    node index.js
-   
+   ```
    sebelum di jalankan edit configurasinya dulu
    
 ## ⚙️ Konfigurasi
