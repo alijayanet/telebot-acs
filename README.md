@@ -43,8 +43,10 @@ git clone https://github.com/alijayanet/telebot-acs
 6. Jalankan bot
    
    node index.js
-
-   ## ⚙️ Konfigurasi
+   
+   sebelum di jalankan edit configurasinya dulu
+   
+## ⚙️ Konfigurasi
 
 1. edit file `config.js` dengan format berikut:
    
