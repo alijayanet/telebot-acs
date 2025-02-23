@@ -25,7 +25,26 @@ Bot Telegram untuk mengelola dan memantau perangkat GenieACS dengan mudah. Bot i
 - Server GenieACS yang sudah terkonfigurasi
 - Token Bot Telegram
 
-## ⚙️ Konfigurasi
+
+## 🚀 Instalasi
+
+apt install git curl -y
+
+1. Clone repository ini
+
+git clone https://github.com/alijayanet/telebot-acs
+
+3. Masuk ke direktori project
+   
+   cd telebot-acs
+4. Install dependensi
+   
+   npm install
+6. Jalankan bot
+   
+   node index.js
+
+   ## ⚙️ Konfigurasi
 
 1. edit file `config.js` dengan format berikut:
    
@@ -51,23 +70,6 @@ password: "password"
    - `genieacs.username`: Username GenieACS
    - `genieacs.password`: Password GenieACS
 
-## 🚀 Instalasi
-
-apt install git curl -y
-
-1. Clone repository ini
-
-git clone https://github.com/alijayanet/telebot-acs
-
-3. Masuk ke direktori project
-   
-   cd telebot-acs
-4. Install dependensi
-   
-   npm install
-6. Jalankan bot
-   
-   node index.js
 
 ### 📱 Cara Penggunaan
 
