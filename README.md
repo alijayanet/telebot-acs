@@ -53,6 +53,9 @@ git clone https://github.com/alijayanet/telebot-acs
 Agar bot telegram tetap berjalan saat console putty di close
 gunakan PM2 untuk menjalankan botnya dengan perintah
 ```
+npm install pm2 -g
+```
+```
 pm2 start node index.js
 ```
 
