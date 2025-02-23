@@ -49,6 +49,14 @@ git clone https://github.com/alijayanet/telebot-acs
    ```
    sebelum di jalankan edit configurasinya dulu
    
+## CATATAN :
+Agar bot telegram tetap berjalan saat console putty di close
+gunakan PM2 untuk menjalankan botnya dengan perintah
+```
+pm2 start node index.js
+```
+
+   
 ## ⚙️ Konfigurasi
 
 1. edit file `config.js` dengan format berikut:
