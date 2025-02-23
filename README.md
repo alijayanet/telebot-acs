@@ -52,23 +52,8 @@ git clone https://github.com/alijayanet/telebot-acs
 ## ⚙️ Konfigurasi
 
 1. edit file `config.js` dengan format berikut:
-   
-name: "Nama Bot",
 
-botToken: "TOKEN_BOT_TELEGRAM",
-
-adminIds: ["ID_ADMIN_1", "ID_ADMIN_2"],
-
-genieacs: 
-
-baseUrl: "http://your-genieacs-server:7557",
-
-username: "username",
-
-password: "password"
-
-
-3. Ganti nilai-nilai berikut:
+2. Ganti nilai-nilai berikut:
    - `botToken`: Token bot Telegram dari BotFather
    - `adminIds`: Array berisi ID Telegram admin
    - `genieacs.baseUrl`: URL server GenieACS
