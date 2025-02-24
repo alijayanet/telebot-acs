@@ -110,3 +110,4 @@ Project ini dilisensikan di bawah [MIT License](LICENSE).
 ## ⚠️ Disclaimer
 
 Bot ini adalah alat bantu untuk mengelola perangkat
+![Image](https://github.com/user-attachments/assets/724e5ac2-626e-4f2d-bd1f-1265b70b544f)
