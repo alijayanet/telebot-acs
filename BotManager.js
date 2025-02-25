@@ -94,9 +94,9 @@ class GenieACSBot {
         this.bot.onText(/\/myid/, (msg) => {
             const chatId = msg.chat.id;
             this.bot.sendMessage(chatId, 
-                'ðŸ†” *ID Telegram Anda*\n\n' +
+                '🆔 *ID Telegram Anda*\n\n' +
                 `ID: \`${chatId}\`\n\n` +
-                'â— Berikan ID ini kepada admin untuk didaftarkan',
+                '❗ Berikan ID ini kepada admin untuk didaftarkan',
                 { parse_mode: 'MarkdownV2' }
             );
         });
@@ -114,13 +114,13 @@ class GenieACSBot {
             
             if (!isAdmin && !customer) {
                 this.bot.sendMessage(chatId, 
-                    'ðŸ‘‹ *Selamat datang di Bot GenieACS*\n\n' +
-                    'âš ï¸ Anda belum terdaftar dalam sistem\\.\n\n' +
-                    'ðŸ“± *Untuk mendaftar:*\n' +
+                    '👋 *Selamat datang di Bot GenieACS*\n\n' +
+                    '⚠️ Anda belum terdaftar dalam sistem\\.\n\n' +
+                    '📱 *Untuk mendaftar:*\n' +
                     '1\\. Gunakan perintah /myid\n' +
                     '2\\. Copy ID Telegram Anda\n' +
                     '3\\. Berikan ID tersebut ke admin\n\n' +
-                    'â— Admin akan mendaftarkan perangkat Anda',
+                    '❗ Admin akan mendaftarkan perangkat Anda',
                     { parse_mode: 'MarkdownV2' }
                 );
                 return;
@@ -128,8 +128,8 @@ class GenieACSBot {
             
             if (isAdmin) {
                 const helpMessage = 
-                    `ðŸ¢ *${this.escapeMarkdown(this.name)} Admin Panel*\n\n` +
-                    'ðŸ“± *Perintah Admin:*\n' +
+                    `🏢 *${this.escapeMarkdown(this.name)} Admin Panel*\n\n` +
+                    '📱 *Perintah Admin:*\n' +
                     '/devices \\- Lihat semua device\n' +
                     '/customers \\- Lihat daftar pelanggan\n' +
                     '/addcustomer \\{ID\\_TELEGRAM\\} \\{NAMA\\} \\{DEVICE\\_SN\\} \\- Tambah pelanggan\n' +
@@ -146,19 +146,19 @@ class GenieACSBot {
                     '1\\. Minta pelanggan kirim /myid ke bot\n' +
                     '2\\. Gunakan ID tersebut di perintah /addcustomer\n' +
                     '3\\. Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`\n\n' +
-                    'â— ID Telegram berbeda dengan nomor telepon\n' +
-                    'â— Gunakan /devices untuk melihat daftar perintah lengkap per device';
+                    '❗ ID Telegram berbeda dengan nomor telepon\n' +
+                    '❗ Gunakan /devices untuk melihat daftar perintah lengkap per device';
 
                 this.sendLongMessage(chatId, helpMessage, { parse_mode: 'MarkdownV2' });
             } else {
                 this.bot.sendMessage(chatId, 
-                    `ðŸ‘‹ *Selamat datang ${customer.name}*\n\n` +
-                    'ðŸ“± *Perintah yang tersedia:*\n' +
+                    `👋 *Selamat datang ${customer.name}*\n\n` +
+                    '📱 *Perintah yang tersedia:*\n' +
                     '/mystatus \\- Cek status perangkat Anda\n' +
                     '/mywifi \\- Cek status WiFi\n' +
                     '/changepass \\{PASSWORD\\} \\- Ganti password WiFi\n\n' +
-                    'â— Password WiFi minimal 8 karakter\n' +
-                    'â— Gunakan kombinasi huruf dan angka',
+                    '❗ Password WiFi minimal 8 karakter\n' +
+                    '❗ Gunakan kombinasi huruf dan angka',
                     { parse_mode: 'MarkdownV2' }
                 );
             }
@@ -174,13 +174,14 @@ class GenieACSBot {
             try {
                 const device = await this.getDeviceInfo(customer.deviceSN);
                 if (!device) {
-                    this.bot.sendMessage(chatId, 'âŒ Perangkat tidak ditemukan');
+                    this.bot.sendMessage(chatId, '❌ Perangkat tidak ditemukan');
                     return;
                 }
 
-                const status = device.Events?.Registered?._value ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline';
+                const status = device.Events?.Registered?._value ? '🟢 Online' : '🔴 Offline';
                 const message = 
-                    `ðŸ“± *Status Perangkat Anda*\n\n` +
+                    `📱 *Status Perangkat Anda*\n\n` +
+                    `Status: ${status}\n` +
                     `Pelanggan: ${this.escapeMarkdown(customer.name)}\n` +
                     `Signal: ${this.escapeMarkdown(device.VirtualParameters?.RXPower?._value || '-')} dBm\n` +
                     `IP: ${this.escapeMarkdown(device.VirtualParameters?.pppoeIP?._value || '-')}\n` +
@@ -188,7 +189,7 @@ class GenieACSBot {
 
                 this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
             } catch (error) {
-                this.bot.sendMessage(chatId, 'âŒ Gagal mengambil status perangkat');
+                this.bot.sendMessage(chatId, '❌ Gagal mengambil status perangkat');
             }
         });
 
@@ -201,20 +202,20 @@ class GenieACSBot {
 
             const newPassword = match[1];
             if (newPassword.length < 8) {
-                this.bot.sendMessage(chatId, 'âŒ Password harus minimal 8 karakter');
+                this.bot.sendMessage(chatId, '❌ Password harus minimal 8 karakter');
                 return;
             }
 
             try {
                 await this.setWiFiPassword(customer.deviceSN, newPassword);
                 this.bot.sendMessage(chatId, 
-                    'âœ… *Password WiFi berhasil diubah\\!*\n\n' +
+                    '✅ *Password WiFi berhasil diubah\\!*\n\n' +
                     `Password baru: \`${newPassword}\`\n\n` +
-                    'â— Perangkat yang terhubung perlu reconnect',
+                    '❗ Perangkat yang terhubung perlu reconnect',
                     { parse_mode: 'MarkdownV2' }
                 );
             } catch (error) {
-                this.bot.sendMessage(chatId, 'âŒ Gagal mengubah password WiFi');
+                this.bot.sendMessage(chatId, '❌ Gagal mengubah password WiFi');
             }
         });
 
@@ -230,23 +231,23 @@ class GenieACSBot {
                 await this.setWiFiSSID(searchTerm, newSSID);
                 
                     await this.bot.sendMessage(chatId, 
-                        'âœ… *Nama WiFi berhasil diubah\\!*\n\n' +
+                        '✅ *Nama WiFi berhasil diubah\\!*\n\n' +
                         `SSID Baru: \`${this.escapeMarkdown(newSSID)}\`\n\n` +
-                        'â— Perangkat yang terhubung perlu reconnect',
+                        '❗ Perangkat yang terhubung perlu reconnect',
                         { parse_mode: 'MarkdownV2' }
                     );
             } catch (error) {
                 console.error(`[${Date.now()}] Error in /setwifi handler:`, error);
-                let errorMessage = 'âŒ Gagal mengubah nama WiFi';
+                let errorMessage = '❌ Gagal mengubah nama WiFi';
                 
                 if (error.response) {
                     console.error(`[${Date.now()}] Response status:`, error.response.status);
                     console.error(`[${Date.now()}] Response data:`, error.response.data);
                     
                     if (error.response.status === 404) {
-                        errorMessage = 'âŒ Device tidak ditemukan';
+                        errorMessage = '❌ Device tidak ditemukan';
                     } else if (error.response.status === 400) {
-                        errorMessage = 'âŒ Parameter tidak valid';
+                        errorMessage = '❌ Parameter tidak valid';
                     }
                 }
                 
@@ -270,12 +271,12 @@ class GenieACSBot {
                 
                 if (!devices || devices.length === 0) {
                     console.log(`[${Date.now()}] No devices found`);
-                    await this.bot.sendMessage(chatId, 'âŒ Tidak ada device yang ditemukan');
+                    await this.bot.sendMessage(chatId, '❌ Tidak ada device yang ditemukan');
                     return;
                 }
 
                 console.log(`[${Date.now()}] Processing ${devices.length} devices`);
-                let message = 'ðŸ“± *Daftar Device*\n\n';
+                let message = '📱 *Daftar Device*\n\n';
                 
                 devices.forEach((device, index) => {
                     try {
@@ -284,7 +285,7 @@ class GenieACSBot {
                         
                         // Get device info
                         const serialNumber = vParams.getSerialNumber?._value || '-';
-                        const status = device.Events?.Registered?._value ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline';
+                        const status = device.Events?.Registered?._value ? '🟢 Online' : '🔴 Offline';
                         const deviceID = [
                             deviceInfo._OUI,
                             deviceInfo._ProductClass,
@@ -293,17 +294,18 @@ class GenieACSBot {
                         
                         // Build message
                         message += `${index + 1}\\. *${this.escapeMarkdown(serialNumber)}*\n`;
+                        message += `Status: ${status}\n`;
                         message += `Device ID: \`${this.escapeMarkdown(deviceID || '-')}\`\n`;
                         message += `Manufacturer: \`${this.escapeMarkdown(deviceInfo._Manufacturer || '-')}\`\n`;
                         message += `OUI: \`${this.escapeMarkdown(deviceInfo._OUI || '-')}\`\n`;
                         message += `Model: \`${this.escapeMarkdown(deviceInfo._ProductClass || '-')}\`\n`;
                         message += `Mode: \`${this.escapeMarkdown(vParams.getponmode?._value || '-')}\`\n`;
-                        message += `ðŸ‘¤ Username: \`${this.escapeMarkdown(vParams.pppoeUsername?._value || '-')}\`\n`;
-                        message += `ðŸ“¡ IP: \`${this.escapeMarkdown(vParams.pppoeIP?._value || '-')}\`\n`;
-                        message += `ðŸ“¶ Signal: \`${this.escapeMarkdown(vParams.RXPower?._value || '-')} dBm\`\n`;
-                        message += `â±ï¸ Device Uptime: \`${this.escapeMarkdown(vParams.getdeviceuptime?._value || '-')}\`\n`;
-                        message += `â±ï¸ PPPoE Uptime: \`${this.escapeMarkdown(vParams.getpppuptime?._value || '-')}\`\n`;
-                        message += `ðŸ‘¥ Connected Users: \`${this.escapeMarkdown(vParams.activedevices?._value || '0')}\`\n`;
+                        message += `👤 Username: \`${this.escapeMarkdown(vParams.pppoeUsername?._value || '-')}\`\n`;
+                        message += `📡 IP: \`${this.escapeMarkdown(vParams.pppoeIP?._value || '-')}\`\n`;
+                        message += `📶 Signal: \`${this.escapeMarkdown(vParams.RXPower?._value || '-')} dBm\`\n`;
+                        message += `⏱️ Device Uptime: \`${this.escapeMarkdown(vParams.getdeviceuptime?._value || '-')}\`\n`;
+                        message += `⏱️ PPPoE Uptime: \`${this.escapeMarkdown(vParams.getpppuptime?._value || '-')}\`\n`;
+                        message += `👥 Connected Users: \`${this.escapeMarkdown(vParams.activedevices?._value || '0')}\`\n`;
                         
                         // Quick Commands
                         message += `\n*Quick Commands:*\n`;
@@ -324,7 +326,7 @@ class GenieACSBot {
             } catch (error) {
                 console.error(`[${Date.now()}] Error processing /devices:`, error);
                 await this.bot.sendMessage(chatId, 
-                    'âŒ Terjadi kesalahan saat mengambil data device\\.\n' +
+                    '❌ Terjadi kesalahan saat mengambil data device\\.\n' +
                     'Silakan coba beberapa saat lagi\\.',
                     { parse_mode: 'MarkdownV2' }
                 );
@@ -355,13 +357,13 @@ class GenieACSBot {
                         const serialNumber = deviceId.SerialNumber?._value || deviceId.OUI?._value;
                         
                         const message = 
-                            `âœ… *Pengguna Ditemukan\\!*\n\n` +
-                            `ðŸ‘¤ Username: \`${username}\`\n` +
-                            `ðŸ“± Serial Number: \`${serialNumber}\`\n\n` +
+                            `✅ *Pengguna Ditemukan\\!*\n\n` +
+                            `👤 Username: \`${username}\`\n` +
+                            `📱 Serial Number: \`${serialNumber}\`\n\n` +
                             '*Quick Command untuk menambahkan:*\n' +
                             `\`/addcustomer {TELEGRAM\\_ID} {NAMA} ${serialNumber}\`\n\n` +
-                            'â— Ganti \\{TELEGRAM\\_ID\\} dengan ID dari /myid\n' +
-                            'â— Ganti \\{NAMA\\} dengan nama pelanggan';
+                            '❗ Ganti \\{TELEGRAM\\_ID\\} dengan ID dari /myid\n' +
+                            '❗ Ganti \\{NAMA\\} dengan nama pelanggan';
 
                         await this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
                         break;
@@ -370,13 +372,13 @@ class GenieACSBot {
 
                 if (!found) {
                     await this.bot.sendMessage(chatId, 
-                        'âŒ Username tidak ditemukan di perangkat manapun\\.',
+                        '❌ Username tidak ditemukan di perangkat manapun\\.',
                         { parse_mode: 'MarkdownV2' }
                     );
                 }
             } catch (error) {
                 console.error(`[${Date.now()}] Error finding user:`, error);
-                await this.bot.sendMessage(chatId, 'âŒ Gagal mencari pengguna');
+                await this.bot.sendMessage(chatId, '❌ Gagal mencari pengguna');
             }
         });
 
@@ -403,16 +405,17 @@ class GenieACSBot {
 
                     if (deviceMatches) {
                         found = true;
-                        const status = device.Events?.Registered?._value ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline';
+                        const status = device.Events?.Registered?._value ? '🟢 Online' : '🔴 Offline';
 
                         const message = 
-                            `ðŸ“± *Informasi Device*\n\n` +
+                            `📱 *Informasi Device*\n\n` +
                             `*Device Info:*\n` +
                             `SN: \`${this.escapeMarkdown(vParams.getSerialNumber?._value || '-')}\`\n` +
                             `Mode: \`${this.escapeMarkdown(vParams.getponmode?._value || '-')}\`\n` +
                             `MAC PON: \`${this.escapeMarkdown(vParams.PonMac?._value || '-')}\`\n\n` +
                             
                             `*Status:*\n` +
+                            `Status: ${status}\n` +
                             `Device Uptime: \`${this.escapeMarkdown(vParams.getdeviceuptime?._value || '-')}\`\n` +
                             `PPPoE Uptime: \`${this.escapeMarkdown(vParams.getpppuptime?._value || '-')}\`\n\n` +
                             
@@ -440,7 +443,7 @@ class GenieACSBot {
 
                 if (!found) {
                     await this.bot.sendMessage(chatId, 
-                        'âŒ Device tidak ditemukan\\. Gunakan:\n' +
+                        '❌ Device tidak ditemukan\\. Gunakan:\n' +
                         '\\- Serial Number\n' +
                         '\\- PPPoE Username',
                         { parse_mode: 'MarkdownV2' }
@@ -448,7 +451,7 @@ class GenieACSBot {
                 }
             } catch (error) {
                 console.error(`[${Date.now()}] Error checking status:`, error);
-                await this.bot.sendMessage(chatId, 'âŒ Gagal mengambil status device');
+                await this.bot.sendMessage(chatId, '❌ Gagal mengambil status device');
             }
         });
 
@@ -461,13 +464,13 @@ class GenieACSBot {
             try {
                 const device = await this.getDeviceInfo(deviceId);
                 if (!device) {
-                    this.bot.sendMessage(chatId, 'âŒ Device tidak ditemukan');
+                    this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
                     return;
                 }
 
                 const wlan = device.InternetGatewayDevice?.LANDevice?.['1']?.WLANConfiguration?.['1'];
                 const message = 
-                    `ðŸ“¡ *WiFi Status*\n\n` +
+                    `📡 *WiFi Status*\n\n` +
                     `SSID: ${this.escapeMarkdown(wlan?.SSID?._value || '-')}\n` +
                     `Connected Users: ${this.escapeMarkdown(String(wlan?.TotalAssociations?._value || '0'))}\n` +
                     `Channel: ${this.escapeMarkdown(String(wlan?.Channel?._value || '-'))}\n` +
@@ -476,7 +479,7 @@ class GenieACSBot {
                 this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
             } catch (error) {
                 console.error(`[${this.name}] Error:`, error);
-                this.bot.sendMessage(chatId, 'âŒ Gagal mengambil status WiFi');
+                this.bot.sendMessage(chatId, '❌ Gagal mengambil status WiFi');
             }
         });
 
@@ -489,7 +492,7 @@ class GenieACSBot {
             try {
                 await this.setWANCredentials(deviceId, username, password);
                 this.bot.sendMessage(chatId, 
-                    'âœ… *WAN Credentials berhasil diatur\\!*\n\n' +
+                    '✅ *WAN Credentials berhasil diatur\\!*\n\n' +
                     `Device: \`${deviceId}\`\n` +
                     `Username: \`${username}\`\n` +
                     `Password: \`${password}\``,
@@ -497,7 +500,7 @@ class GenieACSBot {
                 );
             } catch (error) {
                 console.error(`[${this.name}] Error setting WAN credentials:`, error);
-                this.bot.sendMessage(chatId, 'âŒ Gagal mengatur WAN credentials');
+                this.bot.sendMessage(chatId, '❌ Gagal mengatur WAN credentials');
             }
         });
 
@@ -511,7 +514,7 @@ class GenieACSBot {
                 // Verifikasi device exists
                 const device = await this.getDeviceInfo(deviceSN);
                 if (!device) {
-                    this.bot.sendMessage(chatId, 'âŒ Device tidak ditemukan');
+                    this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
                     return;
                 }
 
@@ -530,7 +533,7 @@ class GenieACSBot {
                 await this.saveConfig();
 
                 this.bot.sendMessage(chatId, 
-                    'âœ… *Pelanggan berhasil ditambahkan\\!*\n\n' +
+                    '✅ *Pelanggan berhasil ditambahkan\\!*\n\n' +
                     `Nama: \`${customerName}\`\n` +
                     `Telegram ID: \`${telegramId}\`\n` +
                     `Device SN: \`${deviceSN}\`\n\n` +
@@ -543,26 +546,26 @@ class GenieACSBot {
                 // Kirim pesan selamat datang ke pelanggan baru
                 try {
                     await this.bot.sendMessage(telegramId, 
-                        `âœ… *Selamat datang di ${this.name}\\!*\n\n` +
+                        `✅ *Selamat datang di ${this.name}\\!*\n\n` +
                         `Halo ${customerName}\\, akun Anda telah didaftarkan\\.\n\n` +
-                        'ðŸ“± *Perintah yang tersedia:*\n' +
+                        '📱 *Perintah yang tersedia:*\n' +
                         '/mystatus \\- Cek status perangkat\n' +
                         '/mywifi \\- Cek status WiFi\n' +
                         '/changepass \\{PASSWORD\\} \\- Ganti password WiFi\n\n' +
-                        'â— Password WiFi minimal 8 karakter\n' +
-                        'â— Gunakan kombinasi huruf dan angka',
+                        '❗ Password WiFi minimal 8 karakter\n' +
+                        '❗ Gunakan kombinasi huruf dan angka',
                         { parse_mode: 'MarkdownV2' }
                     );
                 } catch (error) {
                     this.bot.sendMessage(chatId, 
-                        'âš ï¸ *Peringatan\\:* Pelanggan berhasil ditambahkan tapi gagal mengirim pesan selamat datang\\. ' +
+                        '⚠️ *Peringatan\\:* Pelanggan berhasil ditambahkan tapi gagal mengirim pesan selamat datang\\. ' +
                         'Pastikan pelanggan sudah memulai chat dengan bot\\.',
                         { parse_mode: 'MarkdownV2' }
                     );
                 }
             } catch (error) {
                 console.error(`[${this.name}] Error adding customer:`, error);
-                this.bot.sendMessage(chatId, 'âŒ Gagal menambahkan pelanggan');
+                this.bot.sendMessage(chatId, '❌ Gagal menambahkan pelanggan');
             }
         });
 
@@ -575,7 +578,7 @@ class GenieACSBot {
             try {
                 const customer = this.config.customers?.[telegramId];
                 if (!customer) {
-                    this.bot.sendMessage(chatId, 'âŒ Pelanggan tidak ditemukan');
+                    this.bot.sendMessage(chatId, '❌ Pelanggan tidak ditemukan');
                     return;
                 }
 
@@ -584,7 +587,7 @@ class GenieACSBot {
                 await this.saveConfig();
 
                 this.bot.sendMessage(chatId, 
-                    'âœ… *Pelanggan berhasil dihapus\\!*\n\n' +
+                    '✅ *Pelanggan berhasil dihapus\\!*\n\n' +
                     `Nama: \`${customer.name}\`\n` +
                     `Telegram ID: \`${telegramId}\`\n` +
                     `Device SN: \`${customer.deviceSN}\``,
@@ -594,7 +597,7 @@ class GenieACSBot {
                 // Kirim notifikasi ke pelanggan
                 try {
                     await this.bot.sendMessage(telegramId, 
-                        'âš ï¸ *Pemberitahuan*\n\n' +
+                        '⚠️ *Pemberitahuan*\n\n' +
                         'Akun Anda telah dinonaktifkan\\. ' +
                         'Silakan hubungi admin untuk informasi lebih lanjut\\.',
                         { parse_mode: 'MarkdownV2' }
@@ -604,7 +607,7 @@ class GenieACSBot {
                 }
             } catch (error) {
                 console.error(`[${this.name}] Error deleting customer:`, error);
-                this.bot.sendMessage(chatId, 'âŒ Gagal menghapus pelanggan');
+                this.bot.sendMessage(chatId, '❌ Gagal menghapus pelanggan');
             }
         });
 
@@ -615,12 +618,12 @@ class GenieACSBot {
 
             try {
                 const customers = this.config.customers || {};
-                let message = 'ðŸ‘¥ *Daftar Pelanggan*\n\n';
+                let message = '👥 *Daftar Pelanggan*\n\n';
                 
                 Object.entries(customers).forEach(([telegramId, customer], index) => {
                     message += `${index + 1}\\. *${customer.name}*\n`;
-                    message += `ðŸ“± Telegram ID: \`${telegramId}\`\n`;
-                    message += `ðŸ“¶ Device SN: \`${customer.deviceSN}\`\n\n`;
+                    message += `📱 Telegram ID: \`${telegramId}\`\n`;
+                    message += `📶 Device SN: \`${customer.deviceSN}\`\n\n`;
                     message += '*Quick Commands:*\n';
                     message += `\`/status ${customer.deviceSN}\` \\- Cek status\n`;
                     message += `\`/delcustomer ${telegramId}\` \\- Hapus pelanggan\n`;
@@ -635,12 +638,31 @@ class GenieACSBot {
                 message += '1\\. Minta pelanggan kirim /myid ke bot\n';
                 message += '2\\. Gunakan format berikut:\n';
                 message += '`/addcustomer {ID_TELEGRAM} {NAMA} {DEVICE_SN}`\n\n';
-                message += 'â— Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`\n';
+                message += '❗ Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`\n';
                 
                 await this.sendLongMessage(chatId, message, { parse_mode: 'MarkdownV2' });
             } catch (error) {
                 console.error(`[${this.name}] Error listing customers:`, error);
-                this.bot.sendMessage(chatId, 'âŒ Gagal mengambil daftar pelanggan');
+                this.bot.sendMessage(chatId, '❌ Gagal mengambil daftar pelanggan');
+            }
+        });
+
+        // Handler untuk command /device
+        this.bot.onText(/\/device (.+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            const deviceId = match[1];
+            if (!deviceId) {
+                return this.bot.sendMessage(chatId, 'Silakan masukkan nomor perangkat. Contoh: /device 087828060111');
+            }
+            try {
+                const deviceData = await this.getDeviceDataFromGenieACS(deviceId);
+                if (deviceData) {
+                    this.bot.sendMessage(chatId, `Data perangkat untuk ${deviceId}: ${JSON.stringify(deviceData, null, 2)}`);
+                } else {
+                    this.bot.sendMessage(chatId, `Perangkat dengan ID ${deviceId} tidak ditemukan.`);
+                }
+            } catch (error) {
+                this.bot.sendMessage(chatId, 'Terjadi kesalahan saat mengambil data perangkat.');
             }
         });
 
@@ -653,39 +675,34 @@ class GenieACSBot {
         });
     }
 
-    async getDevicesFromGenieACS() {
-        console.log(`[${Date.now()}] Getting devices from GenieACS...`);
+    async getDeviceDataFromGenieACS(deviceId) {
         try {
-            const url = `${this.config.genieacs.baseUrl}/devices`;
-            console.log(`[${Date.now()}] Requesting URL: ${url}`);
-            console.log(`[${Date.now()}] Auth: ${this.config.genieacs.username}:${this.config.genieacs.password}`);
-            
-            const response = await axios.get(url, {
+            const query = encodeURIComponent(JSON.stringify({"_id": deviceId}));
+            const projection = encodeURIComponent(JSON.stringify({
+                "VirtualParameters.IPTR069": 1,
+                "VirtualParameters.PonMac": 1,
+                "VirtualParameters.RXPower": 1,
+                "VirtualParameters.WlanPassword": 1,
+                "VirtualParameters.activedevices": 1,
+                "VirtualParameters.getSerialNumber": 1,
+                "VirtualParameters.getdeviceuptime": 1,
+                "VirtualParameters.getponmode": 1,
+                "VirtualParameters.getpppuptime": 1,
+                "VirtualParameters.gettemp": 1,
+                "VirtualParameters.pppoeIP": 1,
+                "VirtualParameters.pppoePassword": 1,
+                "VirtualParameters.pppoeUsername": 1,
+                "VirtualParameters.pppoeUsername2": 1
+            }));
+            const response = await axios.get(`${this.config.genieacs.baseUrl}/devices/?query=${query}&projection=${projection}`, {
                 auth: {
                     username: this.config.genieacs.username,
                     password: this.config.genieacs.password
                 }
             });
-
-            console.log(`[${Date.now()}] Got response from GenieACS`);
-            console.log(`[${Date.now()}] Status: ${response.status}`);
-            console.log(`[${Date.now()}] Number of devices: ${response.data.length}`);
-            
-            if (response.data.length > 0) {
-                console.log(`[${Date.now()}] First device:`, JSON.stringify(response.data[0], null, 2));
-            }
-
             return response.data;
         } catch (error) {
-            console.error(`[${Date.now()}] Error getting devices:`, error.message);
-            if (error.response) {
-                console.error(`[${Date.now()}] Response status:`, error.response.status);
-                console.error(`[${Date.now()}] Response data:`, error.response.data);
-            } else if (error.request) {
-                console.error(`[${Date.now()}] No response received:`, error.request);
-            } else {
-                console.error(`[${Date.now()}] Error setting up request:`, error.message);
-            }
+            console.error(`[${this.name}] Error getting device data:`, error);
             throw error;
         }
     }
@@ -701,6 +718,29 @@ class GenieACSBot {
             return response.data;
         } catch (error) {
             console.error(`[${this.name}] Error getting device info:`, error);
+            throw error;
+        }
+    }
+
+    async getDeviceDataFromGenieACS(deviceId) {
+        try {
+            const query = encodeURIComponent(JSON.stringify({"_id": deviceId}));
+            const projection = encodeURIComponent(JSON.stringify({
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": 1,
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.RXPower": 1,
+                "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID": 1,
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.pppoeUsername": 1,
+                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.pppoeIP": 1
+            }));
+            const response = await axios.get(`${this.config.genieacs.baseUrl}/devices/?query=${query}&projection=${projection}`, {
+                auth: {
+                    username: this.config.genieacs.username,
+                    password: this.config.genieacs.password
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`[${this.name}] Error getting device data:`, error);
             throw error;
         }
     }
