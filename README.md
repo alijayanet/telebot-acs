@@ -67,7 +67,7 @@ pm2 start node index.js
 2. Ganti nilai-nilai berikut:
    - `botToken`: Token bot Telegram dari BotFather
    - `adminIds`: Array berisi ID Telegram admin
-   - `genieacs.baseUrl`: URL server GenieACS
+   - `genieacs.baseUrl`: http://192.168.x.xx:7557
    - `genieacs.username`: Username GenieACS
    - `genieacs.password`: Password GenieACS
 
@@ -102,6 +102,8 @@ pm2 start node index.js
 ## 🤝 Kontribusi
 
 Kontribusi selalu diterima! Silakan buat pull request atau laporkan issue jika menemukan bug.
+
+atau gabung di group telegram : https://t.me/alijayaNetAcs
 
 ## 📄 Lisensi
 
