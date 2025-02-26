@@ -73,7 +73,7 @@ bot.onText(/\/status (.+)/, async (msg, match) => {
             `Signal: ${device.VirtualParameters?.RXPower?._value || '-'} dBm\n` +
             `Temperature: ${device.VirtualParameters?.gettemp?._value || '-'}°C\n` +
             `Uptime: ${device.VirtualParameters?.getdeviceuptime?._value || '-'}\n` +
-            `Connected Users: ${device.VirtualParameters?.activedevices?._value || '0'}\n`;
+            `Connected Users: ${device.VirtualParameters?.userconnected?._value || '0'}\n`;
 
         bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
     } catch (error) {

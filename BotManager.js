@@ -145,7 +145,7 @@ class GenieACSBot {
                     '*Cara Menambah Pelanggan:*\n' +
                     '1\\. Minta pelanggan kirim /myid ke bot\n' +
                     '2\\. Gunakan ID tersebut di perintah /addcustomer\n' +
-                    '3\\. Contoh: `/addcustomer 123456789 "alijaya" ZTEGC8F12345`\n\n' +
+                    '3\\. Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`\n\n' +
                     '❗ ID Telegram berbeda dengan nomor telepon\n' +
                     '❗ Gunakan /devices untuk melihat daftar perintah lengkap per device';
 
@@ -429,7 +429,6 @@ class GenieACSBot {
                             
                             `*WiFi:*\n` +
                             `Connected Users: \`${this.escapeMarkdown(vParams.activedevices?._value || '0')}\`\n\n` +
-                            `Connected Users: \`${this.escapeMarkdown(vParams.userconnected?._value || '0')}\`\n\n` +
                             
                             '*Quick Commands:*\n' +
                             `\`/wifi ${searchTerm}\` \\- Cek WiFi\n` +
@@ -648,25 +647,6 @@ class GenieACSBot {
             }
         });
 
-        // Handler untuk command /device
-        this.bot.onText(/\/device (.+)/, async (msg, match) => {
-            const chatId = msg.chat.id;
-            const deviceId = match[1];
-            if (!deviceId) {
-                return this.bot.sendMessage(chatId, 'Silakan masukkan nomor perangkat. Contoh: /device 087828060111');
-            }
-            try {
-                const deviceData = await this.getDeviceDataFromGenieACS(deviceId);
-                if (deviceData) {
-                    this.bot.sendMessage(chatId, `Data perangkat untuk ${deviceId}: ${JSON.stringify(deviceData, null, 2)}`);
-                } else {
-                    this.bot.sendMessage(chatId, `Perangkat dengan ID ${deviceId} tidak ditemukan.`);
-                }
-            } catch (error) {
-                this.bot.sendMessage(chatId, 'Terjadi kesalahan saat mengambil data perangkat.');
-            }
-        });
-
         // Error handler
         this.bot.on('polling_error', (error) => {
             console.error(`[${Date.now()}] Polling error:`, error.message);
@@ -676,35 +656,39 @@ class GenieACSBot {
         });
     }
 
-    async getDeviceDataFromGenieACS(deviceId) {
+    async getDevicesFromGenieACS() {
+        console.log(`[${Date.now()}] Getting devices from GenieACS...`);
         try {
-            const query = encodeURIComponent(JSON.stringify({"_id": deviceId}));
-            const projection = encodeURIComponent(JSON.stringify({
-                "VirtualParameters.IPTR069": 1,
-                "VirtualParameters.PonMac": 1,
-                "VirtualParameters.RXPower": 1,
-                "VirtualParameters.WlanPassword": 1,
-                "VirtualParameters.activedevices": 1,
-                "VirtualParameters.userconnected": 1,
-                "VirtualParameters.getSerialNumber": 1,
-                "VirtualParameters.getdeviceuptime": 1,
-                "VirtualParameters.getponmode": 1,
-                "VirtualParameters.getpppuptime": 1,
-                "VirtualParameters.gettemp": 1,
-                "VirtualParameters.pppoeIP": 1,
-                "VirtualParameters.pppoePassword": 1,
-                "VirtualParameters.pppoeUsername": 1,
-                "VirtualParameters.pppoeUsername2": 1
-            }));
-            const response = await axios.get(`${this.config.genieacs.baseUrl}/devices/?query=${query}&projection=${projection}`, {
+            const url = `${this.config.genieacs.baseUrl}/devices`;
+            console.log(`[${Date.now()}] Requesting URL: ${url}`);
+            console.log(`[${Date.now()}] Auth: ${this.config.genieacs.username}:${this.config.genieacs.password}`);
+            
+            const response = await axios.get(url, {
                 auth: {
                     username: this.config.genieacs.username,
                     password: this.config.genieacs.password
                 }
             });
+
+            console.log(`[${Date.now()}] Got response from GenieACS`);
+            console.log(`[${Date.now()}] Status: ${response.status}`);
+            console.log(`[${Date.now()}] Number of devices: ${response.data.length}`);
+            
+            if (response.data.length > 0) {
+                console.log(`[${Date.now()}] First device:`, JSON.stringify(response.data[0], null, 2));
+            }
+
             return response.data;
         } catch (error) {
-            console.error(`[${this.name}] Error getting device data:`, error);
+            console.error(`[${Date.now()}] Error getting devices:`, error.message);
+            if (error.response) {
+                console.error(`[${Date.now()}] Response status:`, error.response.status);
+                console.error(`[${Date.now()}] Response data:`, error.response.data);
+            } else if (error.request) {
+                console.error(`[${Date.now()}] No response received:`, error.request);
+            } else {
+                console.error(`[${Date.now()}] Error setting up request:`, error.message);
+            }
             throw error;
         }
     }
@@ -720,29 +704,6 @@ class GenieACSBot {
             return response.data;
         } catch (error) {
             console.error(`[${this.name}] Error getting device info:`, error);
-            throw error;
-        }
-    }
-
-    async getDeviceDataFromGenieACS(deviceId) {
-        try {
-            const query = encodeURIComponent(JSON.stringify({"_id": deviceId}));
-            const projection = encodeURIComponent(JSON.stringify({
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.MACAddress": 1,
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.RXPower": 1,
-                "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID": 1,
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.pppoeUsername": 1,
-                "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANIPConnection.1.pppoeIP": 1
-            }));
-            const response = await axios.get(`${this.config.genieacs.baseUrl}/devices/?query=${query}&projection=${projection}`, {
-                auth: {
-                    username: this.config.genieacs.username,
-                    password: this.config.genieacs.password
-                }
-            });
-            return response.data;
-        } catch (error) {
-            console.error(`[${this.name}] Error getting device data:`, error);
             throw error;
         }
     }
