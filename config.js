@@ -8,9 +8,9 @@ module.exports = {
             adminIds: ["xxxxxxxxxx"],
             customers: {},
             genieacs: {
-                baseUrl: "http://103.175.xxxxxxxxxxx",
-                username: "alijaya",
-                password: "xxxxxxxxx"
+                baseUrl: "http://192.168.x.xx:7557",
+                username: "admin",
+                password: "admin"
             }
         },
         // Tambahkan server lain sesuai kebutuhan
