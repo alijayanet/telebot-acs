@@ -4,13 +4,13 @@ module.exports = {
         // Server 1
         server1: {
             name: "ALIJAYA-NET",
-            botToken: "1938127147:AAFMD7X_x7D7RIVmcgCJcKVfwEQumkVwbZU",
-            adminIds: ["567858628"],
+            botToken: "1938127147:AAFMcxxxxxxxx",
+            adminIds: ["56785xxxxxx"],
             customers: {},
             genieacs: {
-                baseUrl: "http://103.175.238.126:4447",
-                username: "alijaya",
-                password: "stb2025"
+                baseUrl: "http://192.168.8.xx:7557",
+                username: "admin",
+                password: "admin"
             }
         },
         // Tambahkan server lain sesuai kebutuhan
