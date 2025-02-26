@@ -103,7 +103,6 @@ pm2 start node index.js
 
 Kontribusi selalu diterima! Silakan buat pull request atau laporkan issue jika menemukan bug.
 
-[atau gabung di group telegram : https://t.me/alijayaNetAcs]
 https://wa.me/6281947215703
 
 atau link group telegram
