@@ -145,7 +145,7 @@ class GenieACSBot {
                     '*Cara Menambah Pelanggan:*\n' +
                     '1\\. Minta pelanggan kirim /myid ke bot\n' +
                     '2\\. Gunakan ID tersebut di perintah /addcustomer\n' +
-                    '3\\. Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`\n\n' +
+                    '3\\. Contoh: `/addcustomer 123456789 "alijaya" ZTEGC8F12345`\n\n' +
                     '❗ ID Telegram berbeda dengan nomor telepon\n' +
                     '❗ Gunakan /devices untuk melihat daftar perintah lengkap per device';
 
@@ -429,6 +429,7 @@ class GenieACSBot {
                             
                             `*WiFi:*\n` +
                             `Connected Users: \`${this.escapeMarkdown(vParams.activedevices?._value || '0')}\`\n\n` +
+                            `Connected Users: \`${this.escapeMarkdown(vParams.userconnected?._value || '0')}\`\n\n` +
                             
                             '*Quick Commands:*\n' +
                             `\`/wifi ${searchTerm}\` \\- Cek WiFi\n` +
@@ -684,6 +685,7 @@ class GenieACSBot {
                 "VirtualParameters.RXPower": 1,
                 "VirtualParameters.WlanPassword": 1,
                 "VirtualParameters.activedevices": 1,
+                "VirtualParameters.userconnected": 1,
                 "VirtualParameters.getSerialNumber": 1,
                 "VirtualParameters.getdeviceuptime": 1,
                 "VirtualParameters.getponmode": 1,
