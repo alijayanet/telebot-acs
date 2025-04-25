@@ -66,8 +66,15 @@ bot.onText(/\/status (.+)/, async (msg, match) => {
             return;
         }
 
+        const isOnline =
+            (device.Events?.Registered?._value) ||
+            (device.VirtualParameters?.pppoeIP?._value && device.VirtualParameters.pppoeIP._value !== '-') ||
+            (device.VirtualParameters?.getdeviceuptime?._value && device.VirtualParameters.getdeviceuptime._value !== '0');
+        const status = isOnline ? '🟢 Online' : '🔴 Offline';
+
         const message = 
             `📱 *Status Device*\n\n` +
+            `Status: ${status}\n` +
             `ID: ${device._id}\n` +
             `Model: ${device.DeviceID?.ProductClass || '-'}\n` +
             `Signal: ${device.VirtualParameters?.RXPower?._value || '-'} dBm\n` +

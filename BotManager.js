@@ -178,10 +178,12 @@ class GenieACSBot {
                     return;
                 }
 
-                const status = device.Events?.Registered?._value ? '🟢 Online' : '🔴 Offline';
+                const isOnline = device.Events?.Registered?._value || device.VirtualParameters?.pppoeIP?._value || device.VirtualParameters?.getdeviceuptime?._value;
+                const status = isOnline ? '🟢 Online' : '🔴 Offline';
                 const message = 
                     `📱 *Status Perangkat Anda*\n\n` +
                     `Pelanggan: ${this.escapeMarkdown(customer.name)}\n` +
+                    `Status: ${status}\n` +
                     `Signal: ${this.escapeMarkdown(device.VirtualParameters?.RXPower?._value || '-')} dBm\n` +
                     `IP: ${this.escapeMarkdown(device.VirtualParameters?.pppoeIP?._value || '-')}\n` +
                     `Uptime: ${this.escapeMarkdown(device.VirtualParameters?.getdeviceuptime?._value || '-')}\n`;
