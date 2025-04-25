@@ -49,16 +49,6 @@ git clone https://github.com/alijayanet/telebot-acs
    ```
    sebelum di jalankan edit configurasinya dulu
    
-## CATATAN :
-Agar bot telegram tetap berjalan saat console putty di close
-gunakan PM2 untuk menjalankan botnya dengan perintah
-```
-npm install pm2 -g
-```
-```
-pm2 start node index.js
-```
-
    
 ## ⚙️ Konfigurasi
 
@@ -70,6 +60,16 @@ pm2 start node index.js
    - `genieacs.baseUrl`: http://192.168.x.xx:7557
    - `genieacs.username`: Username GenieACS
    - `genieacs.password`: Password GenieACS
+     
+## CATATAN :
+Agar bot telegram tetap berjalan saat console putty di close
+gunakan PM2 untuk menjalankan botnya dengan perintah
+```
+npm install pm2 -g
+```
+```
+pm2 start node index.js
+```
 
 
 ### 📱 Cara Penggunaan
