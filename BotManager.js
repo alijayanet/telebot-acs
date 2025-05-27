@@ -128,6 +128,7 @@ class GenieACSBot {
             
             if (isAdmin) {
                 const helpMessage = 
+                    `🏢 *ALIJAYA GENIEACS BOT*\n\n` +
                     `🏢 *${this.escapeMarkdown(this.name)} Admin Panel*\n\n` +
                     '📱 *Perintah Admin:*\n' +
                     '/devices \\- Lihat semua device\n' +
@@ -711,7 +712,7 @@ class GenieACSBot {
     async rebootDevice(deviceId) {
         try {
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks`,
+                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
                 {
                     name: 'reboot',
                     device: deviceId
@@ -733,17 +734,21 @@ class GenieACSBot {
     async setWiFiPassword(deviceId, password) {
         try {
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks`,
+                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
                 {
                     name: 'setParameterValues',
                     parameterValues: [
-                        ['InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.KeyPassphrase', password, 'xsd:string']
+                        ['InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.KeyPassphrase', password, 'xsd:string'],
+                        ['InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.PreSharedKey', password, 'xsd:string']
                     ]
                 },
                 {
                     auth: {
                         username: this.config.genieacs.username,
                         password: this.config.genieacs.password
+                    },
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
                 }
             );
@@ -757,7 +762,7 @@ class GenieACSBot {
     async setWANCredentials(deviceId, username, password) {
         try {
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks`,
+                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
                 {
                     name: 'setParameterValues',
                     parameterValues: [
@@ -818,7 +823,7 @@ class GenieACSBot {
             console.log(`[${Date.now()}] Using device ID: ${formattedDeviceId}`);
             
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${formattedDeviceId}/tasks`,
+                `${this.config.genieacs.baseUrl}/devices/${formattedDeviceId}/tasks?connection_request`,
                 {
                     name: "setParameterValues",
                     parameterValues: [
