@@ -9,6 +9,7 @@ const bots = {};
 
 Object.entries(config.servers).forEach(([serverId, serverConfig]) => {
     try {
+        serverConfig.serverId = serverId;
         console.log(`[${Date.now()}] Starting bot for ${serverConfig.name}...`);
         
         // Validasi konfigurasi

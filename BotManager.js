@@ -189,7 +189,15 @@ class GenieACSBot {
                     `IP: ${this.escapeMarkdown(device.VirtualParameters?.pppoeIP?._value || '-')}\n` +
                     `Uptime: ${this.escapeMarkdown(device.VirtualParameters?.getdeviceuptime?._value || '-')}\n`;
 
-                this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+                const options = {
+                    parse_mode: 'MarkdownV2',
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: '📡 Cek WiFi', callback_data: `wifi:${customer.deviceSN}` }]
+                        ]
+                    }
+                };
+                this.bot.sendMessage(chatId, message, options);
             } catch (error) {
                 this.bot.sendMessage(chatId, '❌ Gagal mengambil status perangkat');
             }
@@ -221,8 +229,8 @@ class GenieACSBot {
             }
         });
 
-        // Update handler /setwifi untuk menggunakan fungsi baru
-        this.bot.onText(/\/setwifi (.+) (.+)/, async (msg, match) => {
+        // Update handler /setwifi untuk menggunakan regex yang ketat (SN/username tidak boleh ada spasi sebelum nama WiFi)
+        this.bot.onText(/\/setwifi (\S+) (.+)/, async (msg, match) => {
             const chatId = msg.chat.id;
             if (!this.config.adminIds.includes(chatId.toString())) return;
 
@@ -437,7 +445,22 @@ class GenieACSBot {
                             `\`/setpass ${searchTerm} PASSWORD\` \\- Ganti Password\n` +
                             `\`/reboot ${searchTerm}\` \\- Restart Device`;
 
-                        await this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+                        const options = {
+                            parse_mode: 'MarkdownV2',
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [
+                                        { text: '📡 WiFi', callback_data: `wifi:${searchTerm}` },
+                                        { text: '👥 Users', callback_data: `users:${searchTerm}` }
+                                    ],
+                                    [
+                                        { text: '📶 Signal', callback_data: `signal:${searchTerm}` },
+                                        { text: '🔄 Reboot', callback_data: `reboot:${searchTerm}` }
+                                    ]
+                                ]
+                            }
+                        };
+                        await this.bot.sendMessage(chatId, message, options);
                         break;
                     }
                 }
@@ -484,8 +507,97 @@ class GenieACSBot {
             }
         });
 
+        // Handler untuk command /setpass (SN/username tanpa spasi, pass di akhir)
+        this.bot.onText(/\/setpass (\S+) (.+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            if (!this.config.adminIds.includes(chatId.toString())) return;
+
+            const searchTerm = match[1];
+            const newPassword = match[2];
+
+            if (newPassword.length < 8) {
+                this.bot.sendMessage(chatId, '❌ Password harus minimal 8 karakter');
+                return;
+            }
+            
+            try {
+                await this.setWiFiPassword(searchTerm, newPassword);
+                
+                await this.bot.sendMessage(chatId, 
+                    '✅ *Password WiFi berhasil diubah!*\n\n' +
+                    `Password Baru: \`${this.escapeMarkdown(newPassword)}\`\n\n` +
+                    '❗ Perangkat yang terhubung perlu reconnect',
+                    { parse_mode: 'MarkdownV2' }
+                );
+            } catch (error) {
+                console.error(`[${Date.now()}] Error in /setpass handler:`, error);
+                await this.bot.sendMessage(chatId, '❌ Gagal mengubah password WiFi');
+            }
+        });
+
+        // Handler untuk command /reboot
+        this.bot.onText(/\/reboot (.+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            if (!this.config.adminIds.includes(chatId.toString())) return;
+
+            const searchTerm = match[1];
+            try {
+                await this.rebootDevice(searchTerm);
+                await this.bot.sendMessage(chatId, `✅ *Perintah reboot berhasil dikirim!*\n\nDevice: \`${this.escapeMarkdown(searchTerm)}\`\n\n❗ Perangkat akan segera restart`, { parse_mode: 'MarkdownV2' });
+            } catch (error) {
+                console.error(`[${Date.now()}] Error in /reboot handler:`, error);
+                await this.bot.sendMessage(chatId, '❌ Gagal melakukan reboot device');
+            }
+        });
+
+        // Handler untuk command /signal
+        this.bot.onText(/\/signal (.+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            if (!this.config.adminIds.includes(chatId.toString())) return;
+
+            const searchTerm = match[1];
+            try {
+                const device = await this.findDevice(searchTerm);
+                if (!device) {
+                    await this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
+                    return;
+                }
+                
+                const vParams = device.VirtualParameters || {};
+                const rxPower = vParams.RXPower?._value || '-';
+                const message = `📶 *Status Signal*\n\nDevice: \`${this.escapeMarkdown(searchTerm)}\`\nSignal RX: \`${this.escapeMarkdown(String(rxPower))} dBm\``;
+                await this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+            } catch (error) {
+                console.error(`[${Date.now()}] Error in /signal handler:`, error);
+                await this.bot.sendMessage(chatId, '❌ Gagal mengambil status signal');
+            }
+        });
+
+        // Handler untuk command /users
+        this.bot.onText(/\/users (.+)/, async (msg, match) => {
+            const chatId = msg.chat.id;
+            if (!this.config.adminIds.includes(chatId.toString())) return;
+
+            const searchTerm = match[1];
+            try {
+                const device = await this.findDevice(searchTerm);
+                if (!device) {
+                    await this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
+                    return;
+                }
+                
+                const vParams = device.VirtualParameters || {};
+                const activeDevices = vParams.activedevices?._value || '0';
+                const message = `👥 *User Terhubung*\n\nDevice: \`${this.escapeMarkdown(searchTerm)}\`\nJumlah User Aktif: \`${this.escapeMarkdown(String(activeDevices))}\``;
+                await this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+            } catch (error) {
+                console.error(`[${Date.now()}] Error in /users handler:`, error);
+                await this.bot.sendMessage(chatId, '❌ Gagal mengambil data user terhubung');
+            }
+        });
+
         // Tambahkan handler untuk command /addwan
-        this.bot.onText(/\/addwan (.+) (.+) (.+)/, async (msg, match) => {
+        this.bot.onText(/\/addwan (\S+) (\S+) (.+)/, async (msg, match) => {
             const chatId = msg.chat.id;
             if (!this.config.adminIds.includes(chatId.toString())) return;
 
@@ -506,7 +618,7 @@ class GenieACSBot {
         });
 
         // Tambahkan handler baru untuk command /addcustomer
-        this.bot.onText(/\/addcustomer (.+) (.+) (.+)/, async (msg, match) => {
+        this.bot.onText(/\/addcustomer (\S+) "(.+?)" (\S+)/, async (msg, match) => {
             const chatId = msg.chat.id;
             if (!this.config.adminIds.includes(chatId.toString())) return;
 
@@ -648,6 +760,63 @@ class GenieACSBot {
             }
         });
 
+        // Handler untuk menangkap klik tombol Interactive Menu (Inline Keyboard)
+        this.bot.on('callback_query', async (query) => {
+            const chatId = query.message.chat.id;
+            const data = query.data;
+
+            // Beri tahu Telegram bahwa klik sudah diterima
+            this.bot.answerCallbackQuery(query.id).catch(() => {});
+
+            // Cek otorisasi
+            const isAdmin = this.config.adminIds.includes(chatId.toString());
+            const customer = this.config.customers?.[chatId.toString()];
+            if (!isAdmin && !customer) return;
+
+            const parts = data.split(':');
+            if (parts.length < 2) return;
+            const action = parts[0];
+            const searchTerm = parts[1];
+
+            // Jika dia pelanggan, batasi tindakan selain device miliknya sendiri
+            if (!isAdmin && customer && searchTerm !== customer.deviceSN) return;
+
+            try {
+                if (action === 'wifi') {
+                    const device = await this.getDeviceInfo(searchTerm);
+                    if (!device) return this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
+                    const wlan = device.InternetGatewayDevice?.LANDevice?.['1']?.WLANConfiguration?.['1'];
+                    const message = 
+                        `📡 *WiFi Status*\n\n` +
+                        `SSID: ${this.escapeMarkdown(wlan?.SSID?._value || '-')}\n` +
+                        `Connected Users: ${this.escapeMarkdown(String(wlan?.TotalAssociations?._value || '0'))}\n` +
+                        `Status: ${wlan?.Enable?._value ? 'Enabled' : 'Disabled'}\n`;
+                    await this.bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+                } 
+                else if (action === 'reboot' && isAdmin) {
+                    await this.bot.sendMessage(chatId, `⏳ *Rebooting ${this.escapeMarkdown(searchTerm)}...*`, { parse_mode: 'MarkdownV2' });
+                    await this.rebootDevice(searchTerm);
+                    await this.bot.sendMessage(chatId, '✅ *Perintah sukses dikirim*', { parse_mode: 'MarkdownV2' });
+                }
+                else if (action === 'users' && isAdmin) {
+                    const device = await this.findDevice(searchTerm);
+                    if (!device) return this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
+                    const vParams = device.VirtualParameters || {};
+                    const activeDevices = vParams.activedevices?._value || '0';
+                    await this.bot.sendMessage(chatId, `👥 *User*: \`${this.escapeMarkdown(String(activeDevices))}\``, { parse_mode: 'MarkdownV2' });
+                }
+                else if (action === 'signal' && isAdmin) {
+                    const device = await this.findDevice(searchTerm);
+                    if (!device) return this.bot.sendMessage(chatId, '❌ Device tidak ditemukan');
+                    const rxPower = device.VirtualParameters?.RXPower?._value || '-';
+                    await this.bot.sendMessage(chatId, `📶 *Signal RX*: \`${this.escapeMarkdown(String(rxPower))} dBm\``, { parse_mode: 'MarkdownV2' });
+                }
+            } catch (error) {
+                console.error(`[${this.name}] Callback Error:`, error);
+                this.bot.sendMessage(chatId, `❌ Gagal memproses ${action}`);
+            }
+        });
+
         // Error handler
         this.bot.on('polling_error', (error) => {
             console.error(`[${Date.now()}] Polling error:`, error.message);
@@ -694,28 +863,43 @@ class GenieACSBot {
         }
     }
 
-    async getDeviceInfo(deviceId) {
+    async findDevice(searchTerm) {
+        const devices = await this.getDevicesFromGenieACS();
+        for (const device of devices) {
+            const vParams = device.VirtualParameters || {};
+            const deviceInfo = device._deviceId || {};
+            
+            if (vParams.pppoeUsername?._value === searchTerm ||
+                vParams.pppoeUsername2?._value === searchTerm ||
+                vParams.getSerialNumber?._value === searchTerm ||
+                deviceInfo._SerialNumber === searchTerm ||
+                device._id === searchTerm) {
+                return device;
+            }
+        }
+        return null;
+    }
+
+    async getDeviceInfo(searchTerm) {
         try {
-            const response = await axios.get(`${this.config.genieacs.baseUrl}/devices/${deviceId}`, {
-                auth: {
-                    username: this.config.genieacs.username,
-                    password: this.config.genieacs.password
-                }
-            });
-            return response.data;
+            const device = await this.findDevice(searchTerm);
+            return device;
         } catch (error) {
             console.error(`[${this.name}] Error getting device info:`, error);
             throw error;
         }
     }
 
-    async rebootDevice(deviceId) {
+    async rebootDevice(searchTerm) {
         try {
+            const device = await this.findDevice(searchTerm);
+            if (!device) throw new Error('Device not found');
+            
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
+                `${this.config.genieacs.baseUrl}/devices/${encodeURIComponent(device._id)}/tasks?connection_request`,
                 {
                     name: 'reboot',
-                    device: deviceId
+                    device: device._id
                 },
                 {
                     auth: {
@@ -731,10 +915,13 @@ class GenieACSBot {
         }
     }
 
-    async setWiFiPassword(deviceId, password) {
+    async setWiFiPassword(searchTerm, password) {
         try {
+            const device = await this.findDevice(searchTerm);
+            if (!device) throw new Error('Device not found');
+            
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
+                `${this.config.genieacs.baseUrl}/devices/${encodeURIComponent(device._id)}/tasks?connection_request`,
                 {
                     name: 'setParameterValues',
                     parameterValues: [
@@ -759,10 +946,13 @@ class GenieACSBot {
         }
     }
 
-    async setWANCredentials(deviceId, username, password) {
+    async setWANCredentials(searchTerm, username, password) {
         try {
+            const device = await this.findDevice(searchTerm);
+            if (!device) throw new Error('Device not found');
+            
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${deviceId}/tasks?connection_request`,
+                `${this.config.genieacs.baseUrl}/devices/${encodeURIComponent(device._id)}/tasks?connection_request`,
                 {
                     name: 'setParameterValues',
                     parameterValues: [
@@ -784,51 +974,17 @@ class GenieACSBot {
         }
     }
 
-    async setWiFiSSID(deviceId, ssid) {
+    async setWiFiSSID(searchTerm, ssid) {
         try {
-            const devices = await this.getDevicesFromGenieACS();
-            console.log(`[${Date.now()}] Searching for device with ID: ${deviceId}`);
-            
-            let targetDevice = null;
-            
-            // Cari device berdasarkan username atau SN
-            for (const device of devices) {
-                const vParams = device.VirtualParameters || {};
-                const deviceInfo = device._deviceId || {};
-                
-                console.log(`[${Date.now()}] Checking device:`, {
-                    searchId: deviceId,
-                    username: vParams.pppoeUsername?._value,
-                    serialNumber: deviceInfo._SerialNumber,
-                    deviceId: device._id
-                });
-                
-                if (vParams.pppoeUsername?._value === deviceId || 
-                    deviceInfo._SerialNumber === deviceId) {
-                    console.log(`[${Date.now()}] Found matching device!`);
-                    targetDevice = device;
-                    break;
-                }
-            }
-
-            if (!targetDevice) {
-                console.log(`[${Date.now()}] No device found matching ID: ${deviceId}`);
-                throw new Error('Device not found');
-            }
-
-            // Construct device ID dengan format yang benar
-            const deviceInfo = targetDevice._deviceId;
-            const formattedDeviceId = `${deviceInfo._OUI}-${deviceInfo._ProductClass.replace(/ /g, '%20')}-${deviceInfo._SerialNumber}`;
-            
-            console.log(`[${Date.now()}] Using device ID: ${formattedDeviceId}`);
+            const device = await this.findDevice(searchTerm);
+            if (!device) throw new Error('Device not found');
             
             const response = await axios.post(
-                `${this.config.genieacs.baseUrl}/devices/${formattedDeviceId}/tasks?connection_request`,
+                `${this.config.genieacs.baseUrl}/devices/${encodeURIComponent(device._id)}/tasks?connection_request`,
                 {
                     name: "setParameterValues",
                     parameterValues: [
-                        ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", ssid, "xsd:string"],
-                        ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.X_TP_PreSharedKey", ssid, "xsd:string"]
+                        ["InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", ssid, "xsd:string"]
                     ]
                 },
                 {
@@ -862,13 +1018,22 @@ class GenieACSBot {
         }
     }
 
+
     // Tambahkan method untuk menyimpan konfigurasi
     async saveConfig() {
         try {
             const fs = require('fs').promises;
             const configPath = './config.js';
-            const configContent = `module.exports = ${JSON.stringify(this.config, null, 2)};`;
-            await fs.writeFile(configPath, configContent);
+            delete require.cache[require.resolve('./config.js')];
+            const currentConfig = require('./config.js');
+            
+            if (this.config.serverId && currentConfig.servers[this.config.serverId]) {
+                currentConfig.servers[this.config.serverId] = this.config;
+                const configContent = `module.exports = ${JSON.stringify(currentConfig, null, 4)};\n`;
+                await fs.writeFile(configPath, configContent);
+            } else {
+                console.warn(`[${this.name}] Server ID tidak ditemukan saat menyimpan konfigurasi, konfigurasi diskip untuk keamanan.`);
+            }
         } catch (error) {
             console.error(`[${this.name}] Error saving config:`, error);
             throw error;
