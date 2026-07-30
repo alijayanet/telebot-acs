@@ -21,58 +21,63 @@ Bot Telegram untuk mengelola dan memantau perangkat GenieACS dengan mudah. Bot i
 
 ## 📋 Prasyarat
 
-- Node.js v12 atau lebih baru
+- Node.js v14 atau lebih baru
 - Server GenieACS yang sudah terkonfigurasi
-- Token Bot Telegram
-
+- Token Bot Telegram (dari @BotFather)
 
 ## 🚀 Instalasi
-```
-apt install git curl -y
-```
 
-1. Clone repository ini
-```
-git clone https://github.com/alijayanet/telebot-acs
-```
-3. Masuk ke direktori project
-   ```
+1. **Clone repository ini**
+   ```bash
+   git clone https://github.com/alijayanet/telebot-acs
    cd telebot-acs
    ```
-4. Install dependensi
-   ```
+
+2. **Install dependensi**
+   ```bash
    npm install
    ```
-6. Jalankan bot
+
+3. **Konfigurasi Environment Variable**
+   Salin file `.env.example` menjadi `.env`:
+   ```bash
+   cp .env.example .env
    ```
-   node index.js
+   Buka dan edit file `.env` menggunakan teks editor (misal: `nano .env`):
+   ```env
+   SERVER1_NAME=ALIJAYA-NET
+   SERVER1_BOT_TOKEN=1938127147:AAFMcxxxxxxxx
+   SERVER1_ADMIN_IDS=56785xxxxxx
+   SERVER1_GENIEACS_URL=http://192.168.8.xx:7557
+   SERVER1_GENIEACS_USER=admin
+   SERVER1_GENIEACS_PASS=admin
    ```
-   sebelum di jalankan edit configurasinya dulu
-   
-   
-## ⚙️ Konfigurasi
+   *(Atau Anda juga dapat menyesuaikan konfigurasi multi-server langsung di file `config.js`)*
 
-1. edit file `config.js` dengan format berikut:
+4. **Jalankan Bot**
+   ```bash
+   npm start
+   ```
 
-2. Ganti nilai-nilai berikut:
-   - `botToken`: Token bot Telegram dari BotFather
-   - `adminIds`: Array berisi ID Telegram admin
-   - `genieacs.baseUrl`: http://192.168.x.xx:7557
-   - `genieacs.username`: Username GenieACS
-   - `genieacs.password`: Password GenieACS
-     
-## CATATAN :
-Agar bot telegram tetap berjalan saat console putty di close
-gunakan PM2 untuk menjalankan botnya dengan perintah
-```
-npm install pm2 -g
-```
-```
-pm2 start node index.js
-```
+## ⚙️ Menjalankan di Background (PM2)
 
+Agar bot tetap berjalan di background saat koneksi SSH/Putty ditutup, gunakan **PM2**:
 
-### 📱 Cara Penggunaan
+1. Install PM2 secara global:
+   ```bash
+   npm install pm2 -g
+   ```
+2. Jalankan bot dengan PM2:
+   ```bash
+   pm2 start index.js --name "genieacs-bot"
+   ```
+3. Menyimpan status autostart PM2:
+   ```bash
+   pm2 save
+   pm2 startup
+   ```
+
+## 📱 Cara Penggunaan
 
 ### Untuk Admin
 
@@ -80,7 +85,7 @@ pm2 start node index.js
 2. Gunakan `/devices` untuk melihat semua perangkat
 3. Untuk menambah pelanggan:
    - Minta pelanggan mengirim `/myid`
-   - Gunakan `/addcustomer {ID_TELEGRAM} {NAMA} {DEVICE_SN}`
+   - Gunakan `/addcustomer {ID_TELEGRAM} "NAMA" {DEVICE_SN}`
    - Contoh: `/addcustomer 123456789 "John Doe" ZTEGC8F12345`
 
 ### Untuk Pelanggan
@@ -95,26 +100,17 @@ pm2 start node index.js
 ## 🔒 Keamanan
 
 - Bot menggunakan sistem autentikasi berbasis ID Telegram
+- Data pelanggan disimpan terisolasi di `data/customers.json`
 - Hanya admin yang dapat mengakses fitur administratif
-- Pelanggan hanya dapat mengakses perangkat yang terdaftar untuk mereka
-- Password dan kredensial sensitif disimpan dengan aman
+- Kredensial sensitif dikonfigurasi melalui `.env` atau `config.js` tanpa terekspos di log
 
-## 🤝 Kontribusi
+## 🤝 Kontribusi & Komunitas
 
 Kontribusi selalu diterima! Silakan buat pull request atau laporkan issue jika menemukan bug.
 
-https://wa.me/6281947215703
-
-atau link group telegram
-
-https://t.me/alijayaNetAcs
+- 💬 WhatsApp: https://wa.me/6281947215703
+- 💬 Group Telegram: https://t.me/alijayaNetAcs
 
 ## 📄 Lisensi
 
 Project ini dilisensikan di bawah [MIT License](LICENSE).
-
-## ⚠️ Disclaimer
-
-Bot ini adalah alat bantu untuk mengelola perangkat
-silahkan bila ingin memberikan uang kopi seikhlasnya
-![Image](https://github.com/user-attachments/assets/724e5ac2-626e-4f2d-bd1f-1265b70b544f)
